@@ -120,6 +120,38 @@ app.delete('/comment/:commentId',async(req,res)=>{
     }
 })
 
+app.post('/comment/:commentId/replies',async(req,res)=>{
+   
+    const{commentId}=req.params;
+    const {content,userId,name,originalCommentAuthor}=req.body;
+    
+    
+    try{
+        
+        const comment=await Comments.findById(commentId).populate('user');
+    
+        if(!comment){
+            
+            return res.status(404).json({message:'Comment not found 1'})
+        }
+        const reply={
+            content,
+            user:userId,
+            name:name,
+            originalCommentAuthor
+        };
+        
+        comment.replies.push(reply);
+        
+        await comment.save();
+        
+
+        res.status(201).json(comment);
+    }catch(error){
+        res.status(500).json({message:'server error',error:error.message});
+    }
+})
+
 
 app.listen(port, () => {
     console.log('Server running on Port', port);
