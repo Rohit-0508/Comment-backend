@@ -153,6 +153,29 @@ app.post('/comment/:commentId/replies',async(req,res)=>{
 })
 
 
+app.delete('/comment/:commentId/replies/:replyId', async (req, res) => {
+    const { commentId, replyId } = req.params;
+    console.log(commentId, replyId)
+    try {
+        // Find the comment and remove the reply
+        const updatedComment = await Comments.findByIdAndUpdate(
+            commentId,
+            { $pull: { replies: { _id: replyId } } },
+            { new: true }
+        );
+
+        if (!updatedComment) {
+            return res.status(404).send({ message: 'Comment not found' });
+        }
+
+        res.status(200).send(updatedComment);
+    } catch (error) {
+        console.error('Error deleting reply:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
+
 app.listen(port, () => {
     console.log('Server running on Port', port);
 })
